@@ -5,12 +5,13 @@ import type { UserProfile, WorkoutPlan } from '../types';
 
 interface Props {
   profile: UserProfile;
+  plan: WorkoutPlan | null;
+  setPlan: (plan: WorkoutPlan | null) => void;
   onBack: () => void;
 }
 
-export function WorkoutPlanner({ profile, onBack }: Props) {
+export function WorkoutPlanner({ profile, plan, setPlan, onBack }: Props) {
   const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState<WorkoutPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {

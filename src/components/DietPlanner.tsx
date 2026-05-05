@@ -6,12 +6,13 @@ import type { UserProfile, FoodItem, DietPlan } from '../types';
 interface Props {
   profile: UserProfile;
   foodHistory: FoodItem[];
+  plan: DietPlan | null;
+  setPlan: (plan: DietPlan | null) => void;
   onBack: () => void;
 }
 
-export function DietPlanner({ profile, foodHistory, onBack }: Props) {
+export function DietPlanner({ profile, foodHistory, plan, setPlan, onBack }: Props) {
   const [loading, setLoading] = useState(false);
-  const [plan, setPlan] = useState<DietPlan | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {

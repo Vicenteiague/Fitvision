@@ -20,6 +20,24 @@ export default function App() {
   const [foodHistory, setFoodHistory] = useState<FoodItem[]>([]);
   const [view, setView] = useState<'dashboard' | 'vision' | 'diet' | 'coach' | 'workout'>('dashboard');
 
+  const [dietPlan, setDietPlan] = useState<any>(() => {
+    const saved = localStorage.getItem('fitvision_diet');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const [workoutPlan, setWorkoutPlan] = useState<any>(() => {
+    const saved = localStorage.getItem('fitvision_workout');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  useEffect(() => {
+    if (dietPlan) localStorage.setItem('fitvision_diet', JSON.stringify(dietPlan));
+  }, [dietPlan]);
+
+  useEffect(() => {
+    if (workoutPlan) localStorage.setItem('fitvision_workout', JSON.stringify(workoutPlan));
+  }, [workoutPlan]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -125,15 +143,21 @@ export default function App() {
   }
 
   if (view === 'diet') {
-    return <DietPlanner profile={profile} foodHistory={foodHistory} onBack={() => setView('dashboard')} />;
+    return <DietPlanner profile={profile} foodHistory={foodHistory} plan={dietPlan} setPlan={setDietPlan} onBack={() => setView('dashboard')} />;
   }
 
   if (view === 'coach') {
-    return <AICoach profile={profile} onBack={() => setView('dashboard')} />
+    return <AICoach 
+      profile={profile} 
+      onBack={() => setView('dashboard')} 
+      foodHistory={foodHistory}
+      onSetDiet={setDietPlan}
+      onSetWorkout={setWorkoutPlan}
+    />
   }
 
   if (view === 'workout') {
-    return <WorkoutPlanner profile={profile} onBack={() => setView('dashboard')} />
+    return <WorkoutPlanner profile={profile} plan={workoutPlan} setPlan={setWorkoutPlan} onBack={() => setView('dashboard')} />
   }
 
   return (

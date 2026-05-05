@@ -94,7 +94,12 @@ Forneça sugestões detalhadas. Responda estritamente em JSON usando o schema de
   return JSON.parse(text) as DietPlan;
 }
 
-export async function chatWithCoach(message: string, profile: UserProfile, previousMessages: {role: string, text: string}[]) {
+export async function chatWithCoach(
+  message: string, 
+  profile: UserProfile, 
+  previousMessages: {role: string, text: string}[],
+  onAction?: (action: 'generate_diet' | 'generate_workout') => void
+) {
   const contents: any[] = [
     { 
       role: 'user', 
@@ -113,12 +118,43 @@ export async function chatWithCoach(message: string, profile: UserProfile, previ
 
   contents.push({ role: 'user', parts: [{ text: message }] });
 
+  const tools: any = [{
+    functionDeclarations: [
+      {
+        name: 'trigger_diet_generation',
+        description: 'Chame essa função APENAS quando o usuário pedir explicitamente para criar, fazer ou gerar um cardápio ou dieta NOVA para ele.',
+        parameters: { type: Type.OBJECT, properties: {} }
+      },
+      {
+        name: 'trigger_workout_generation',
+        description: 'Chame essa função APENAS quando o usuário pedir explicitamente para criar, fazer ou gerar um plano de treino NOVO para ele.',
+        parameters: { type: Type.OBJECT, properties: {} }
+      }
+    ]
+  }];
+
   const response = await ai.models.generateContent({
     model: 'gemini-3.1-pro-preview',
-    contents
+    contents,
+    config: {
+      tools
+    }
   });
 
-  return response.text;
+  const functionCalls = response.functionCalls;
+  if (functionCalls && functionCalls.length > 0) {
+    const call = functionCalls[0];
+    if (call.name === 'trigger_diet_generation' && onAction) {
+      onAction('generate_diet');
+      return "Acabei de colocar a mão na massa! 🥗 O seu cardápio personalizado está sendo gerado e estará disponível na aba **Cardápio IA**.";
+    }
+    if (call.name === 'trigger_workout_generation' && onAction) {
+      onAction('generate_workout');
+      return "Pode deixar comigo! 💪 Seu treino personalizado está sendo montado e logo estará na aba **Treino IA**.";
+    }
+  }
+
+  return response.text || "Entendi. Como posso ajudar com seu objetivo hoje?";
 }
 
 export async function generateWorkoutPlan(profile: UserProfile) {

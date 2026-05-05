@@ -1,17 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Send, Bot } from 'lucide-react';
-import { chatWithCoach } from '../services/geminiService';
-import type { UserProfile } from '../types';
+import { chatWithCoach, generateDietPlan, generateWorkoutPlan } from '../services/geminiService';
+import type { UserProfile, FoodItem, DietPlan, WorkoutPlan } from '../types';
 
 interface Props {
   profile: UserProfile;
+  foodHistory: FoodItem[];
+  onSetDiet: (plan: DietPlan) => void;
+  onSetWorkout: (plan: WorkoutPlan) => void;
   onBack: () => void;
 }
 
-export function AICoach({ profile, onBack }: Props) {
+export function AICoach({ profile, foodHistory, onSetDiet, onSetWorkout, onBack }: Props) {
   const [messages, setMessages] = useState<{role: string, text: string}[]>([{
     role: 'model',
-    text: `Olá! Sou a FitVision IA, seu treinador online. Como posso ajudar com seu objetivo de ${profile.goal.replace('_', ' ')} hoje?`
+    text: `Olá! Sou a FitVision IA, seu treinador online. Como posso ajudar com seu objetivo de ${profile.goal.replace('_', ' ')} hoje? (Dica: me peça para montar um treino ou cardápio!)`
   }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,8 +28,16 @@ export function AICoach({ profile, onBack }: Props) {
     setLoading(true);
 
     try {
-      const reply = await chatWithCoach(userMsg, profile, messages.slice(1)); // ignora a primeria msg de boas vindas pro historico limpo
-      setMessages(prev => [...prev, { role: 'model', text: reply || 'Aconteceu um erro na geração.' }]);
+      const reply = await chatWithCoach(userMsg, profile, messages.slice(1), async (action) => {
+        if (action === 'generate_diet') {
+          // Trigger generation in background
+          generateDietPlan(profile, foodHistory).then(plan => onSetDiet(plan)).catch(console.error);
+        } else if (action === 'generate_workout') {
+          // Trigger generation in background
+          generateWorkoutPlan(profile).then(plan => onSetWorkout(plan)).catch(console.error);
+        }
+      });
+      setMessages(prev => [...prev, { role: 'model', text: reply }]);
     } catch (err) {
       setMessages(prev => [...prev, { role: 'model', text: 'Tive um problema de conexão. Poderia tentar de novo?' }]);
     } finally {
