@@ -1,0 +1,8 @@
+{
+  "name": "FitVision AI",
+  "description": "Fitness SaaS with Vision AI for food tracking and personalized diets.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}

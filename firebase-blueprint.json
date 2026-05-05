@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user settings and physical status.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "gender": { "type": "string", "enum": ["masculino", "feminino"] },
+        "goal": { "type": "string", "enum": ["ganho_massa", "perda_peso", "hipertrofia"] },
+        "weight": { "type": "number" },
+        "height": { "type": "number" },
+        "age": { "type": "number" },
+        "timelineMonths": { "type": "number" },
+        "bmr": { "type": "number" },
+        "tdee": { "type": "number" },
+        "targetCalories": { "type": "number" },
+        "targetMacros": {
+          "type": "object",
+          "properties": {
+            "carbs": { "type": "number" },
+            "protein": { "type": "number" },
+            "fat": { "type": "number" }
+          },
+          "required": ["carbs", "protein", "fat"]
+        },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["uid", "gender", "goal", "weight", "height", "age", "timelineMonths", "bmr", "tdee", "targetCalories", "targetMacros", "createdAt"]
+    },
+    "FoodItem": {
+      "title": "Food Item",
+      "description": "A food item logged by the user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "calories": { "type": "number" },
+        "macros": {
+          "type": "object",
+          "properties": {
+            "carbs": { "type": "number" },
+            "protein": { "type": "number" },
+            "fat": { "type": "number" }
+          },
+          "required": ["carbs", "protein", "fat"]
+        },
+        "timestamp": { "type": "number" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["id", "name", "calories", "macros", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "User profiles."
+    },
+    "/users/{userId}/foods/{foodId}": {
+      "schema": { "$ref": "#/entities/FoodItem" },
+      "description": "Food items logged by the user."
+    }
+  }
+}
