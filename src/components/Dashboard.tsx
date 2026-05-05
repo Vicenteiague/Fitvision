@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { Activity, Camera, Calendar, Flame, Droplets, MessageSquare } from 'lucide-react';
+import { Activity, Camera, Calendar, Flame, Droplets, MessageSquare, Dumbbell } from 'lucide-react';
 import type { UserProfile, FoodItem } from '../types';
 
 interface Props {
@@ -9,9 +9,10 @@ interface Props {
   onOpenTracker: () => void;
   onOpenDiet: () => void;
   onOpenCoach: () => void;
+  onOpenWorkout: () => void;
 }
 
-export function Dashboard({ profile, foodHistory, onOpenTracker, onOpenDiet, onOpenCoach }: Props) {
+export function Dashboard({ profile, foodHistory, onOpenTracker, onOpenDiet, onOpenCoach, onOpenWorkout }: Props) {
   const [waterGlasses, setWaterGlasses] = useState(0);
 
   const getTodayStart = () => new Date().setHours(0,0,0,0);
@@ -121,7 +122,7 @@ export function Dashboard({ profile, foodHistory, onOpenTracker, onOpenDiet, onO
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-3 gap-3 pt-4">
+        <div className="grid grid-cols-4 gap-2 pt-4">
           <button 
             onClick={onOpenTracker}
             className="flex flex-col items-center justify-center py-4 px-2 bg-[#121212] hover:bg-[#1a1a1a] border border-gray-800 rounded-2xl transition-colors group"
@@ -129,7 +130,7 @@ export function Dashboard({ profile, foodHistory, onOpenTracker, onOpenDiet, onO
             <div className="w-10 h-10 bg-[#39FF14]/10 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
               <Camera className="w-5 h-5 text-[#39FF14]" />
             </div>
-            <span className="text-[11px] font-medium text-center uppercase tracking-wider">Vision<br/>Tracker</span>
+            <span className="text-[10px] font-medium text-center uppercase tracking-wider">Vision<br/>Tracker</span>
           </button>
 
           <button 
@@ -139,7 +140,17 @@ export function Dashboard({ profile, foodHistory, onOpenTracker, onOpenDiet, onO
             <div className="w-10 h-10 bg-[#39FF14]/10 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
               <Calendar className="w-5 h-5 text-[#39FF14]" />
             </div>
-            <span className="text-[11px] font-medium text-center uppercase tracking-wider">Cardápio<br/>IA</span>
+            <span className="text-[10px] font-medium text-center uppercase tracking-wider">Cardápio<br/>IA</span>
+          </button>
+
+          <button 
+            onClick={onOpenWorkout}
+            className="flex flex-col items-center justify-center py-4 px-2 bg-[#121212] hover:bg-[#1a1a1a] border border-gray-800 rounded-2xl transition-colors group relative overflow-hidden"
+          >
+            <div className="w-10 h-10 bg-[#39FF14]/10 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform border-gray-800 border">
+              <Dumbbell className="w-5 h-5 text-[#39FF14]" />
+            </div>
+            <span className="text-[10px] font-medium text-center uppercase tracking-wider text-gray-200">Treino<br/>IA</span>
           </button>
 
           <button 
@@ -150,7 +161,7 @@ export function Dashboard({ profile, foodHistory, onOpenTracker, onOpenDiet, onO
             <div className="w-10 h-10 bg-[#39FF14]/10 rounded-full flex items-center justify-center mb-2 group-hover:scale-110 transition-transform border border-[#39FF14]/20">
               <MessageSquare className="w-5 h-5 text-[#39FF14]" />
             </div>
-            <span className="text-[11px] font-medium text-center uppercase tracking-wider text-[#39FF14]">Coach<br/>Chat</span>
+            <span className="text-[10px] font-medium text-center uppercase tracking-wider text-[#39FF14]">Coach<br/>Chat</span>
           </button>
         </div>
 

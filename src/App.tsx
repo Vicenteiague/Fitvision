@@ -5,6 +5,7 @@ import { VisionTracker } from './components/VisionTracker';
 import { DietPlanner } from './components/DietPlanner';
 import { Login } from './components/Login';
 import { AICoach } from './components/AICoach';
+import { WorkoutPlanner } from './components/WorkoutPlanner';
 import type { UserProfile, FoodItem } from './types';
 import { auth, db, handleFirestoreError, OperationType, signOut } from './lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -17,7 +18,7 @@ export default function App() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [foodHistory, setFoodHistory] = useState<FoodItem[]>([]);
-  const [view, setView] = useState<'dashboard' | 'vision' | 'diet'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'vision' | 'diet' | 'coach' | 'workout'>('dashboard');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -131,6 +132,10 @@ export default function App() {
     return <AICoach profile={profile} onBack={() => setView('dashboard')} />
   }
 
+  if (view === 'workout') {
+    return <WorkoutPlanner profile={profile} onBack={() => setView('dashboard')} />
+  }
+
   return (
     <div className="relative">
       <button 
@@ -144,6 +149,7 @@ export default function App() {
         foodHistory={foodHistory} 
         onOpenTracker={() => setView('vision')}
         onOpenDiet={() => setView('diet')}
+        onOpenWorkout={() => setView('workout')}
         onOpenCoach={() => setView('coach')}
       />
     </div>

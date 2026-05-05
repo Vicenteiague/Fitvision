@@ -43,3 +43,16 @@ export interface DietPlan {
     }[];
   }[];
 }
+
+export interface WorkoutPlan {
+  days: {
+    day: string;
+    focus: string;
+    exercises: {
+      name: string;
+      sets: string;
+      reps: string;
+      rest?: string;
+    }[];
+  }[];
+}

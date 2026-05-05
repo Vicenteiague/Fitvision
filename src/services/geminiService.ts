@@ -120,3 +120,58 @@ export async function chatWithCoach(message: string, profile: UserProfile, previ
 
   return response.text;
 }
+
+export async function generateWorkoutPlan(profile: UserProfile) {
+  let goalText = profile.goal;
+  if (profile.goal === 'ganho_massa') goalText = 'Ganho de Massa Muscular';
+  if (profile.goal === 'perda_peso') goalText = 'Perda de Peso';
+  if (profile.goal === 'hipertrofia') goalText = 'Hipertrofia Muscular';
+
+  const prompt = `Crie uma rotina de treinos semanal (7 dias) com base no objetivo de ${goalText}.
+A pessoa pesa ${profile.weight}kg e tem ${profile.height}cm.
+O treino deve ser dividido adequadamente (ex: ABC, Full Body, Upper/Lower, etc).
+Para dias de descanso, deixe a lista de exercícios com 1 item descrevendo o tipo de descanso.
+Responda estritamente em JSON usando o schema definido.`;
+
+  const response = await ai.models.generateContent({
+     model: 'gemini-3.1-pro-preview',
+     contents: prompt,
+     config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+           type: Type.OBJECT,
+           properties: {
+              days: {
+                 type: Type.ARRAY,
+                 items: {
+                    type: Type.OBJECT,
+                    properties: {
+                       day: { type: Type.STRING, description: "Nome do dia (Ex: Segunda-feira)" },
+                       focus: { type: Type.STRING, description: "Foco muscular ou atividade (Ex: Peito e Tríceps, ou Descanso Ativo)" },
+                       exercises: {
+                          type: Type.ARRAY,
+                          items: {
+                             type: Type.OBJECT,
+                             properties: {
+                                name: { type: Type.STRING, description: "Nome do exercício" },
+                                sets: { type: Type.STRING, description: "Séries (ex: 3, 4)" },
+                                reps: { type: Type.STRING, description: "Repetições (ex: 10-12)" },
+                                rest: { type: Type.STRING, description: "Descanso (ex: 60s)" }
+                             },
+                             required: ["name", "sets", "reps"]
+                          }
+                       }
+                    },
+                    required: ["day", "focus", "exercises"]
+                 }
+              }
+           },
+           required: ["days"]
+        }
+     }
+  });
+
+  const text = response.text?.trim();
+  if (!text) throw new Error("No response from AI");
+  return JSON.parse(text) as any;
+}
