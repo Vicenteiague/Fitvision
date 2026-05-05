@@ -22,23 +22,7 @@ service cloud.firestore {
     }
 
     function isValidUserProfile(data) {
-      return data.keys().hasAll(['uid', 'gender', 'goal', 'weight', 'height', 'age', 'timelineMonths', 'bmr', 'tdee', 'targetCalories', 'targetMacros', 'createdAt'])
-        && data.uid == request.auth.uid
-        && data.gender is string && (data.gender == 'masculino' || data.gender == 'feminino')
-        && data.goal is string && (data.goal == 'ganho_massa' || data.goal == 'perda_peso' || data.goal == 'hipertrofia')
-        && data.weight is number
-        && data.height is number
-        && data.age is number
-        && data.timelineMonths is number
-        && data.bmr is number
-        && data.tdee is number
-        && data.targetCalories is number
-        && data.targetMacros is map
-        && data.targetMacros.keys().hasAll(['carbs', 'protein', 'fat'])
-        && data.targetMacros.carbs is number
-        && data.targetMacros.protein is number
-        && data.targetMacros.fat is number
-        && data.createdAt is timestamp;
+      return data.uid == request.auth.uid;
     }
 
     function isValidFoodItem(data) {
@@ -60,11 +44,8 @@ service cloud.firestore {
       allow list: if isSignedIn() && resource.data.uid == request.auth.uid;
       
       allow create: if isSignedIn() 
-                    && isValidId(userId) 
                     && request.auth.uid == userId 
-                    && isValidUserProfile(incoming()) 
-                    && incoming().keys().hasOnly(['uid', 'gender', 'goal', 'weight', 'height', 'age', 'timelineMonths', 'bmr', 'tdee', 'targetCalories', 'targetMacros', 'createdAt'])
-                    && incoming().createdAt == request.time;
+                    && isValidUserProfile(incoming());
                     
       allow update: if isSignedIn() 
                     && request.auth.uid == userId
@@ -85,7 +66,7 @@ service cloud.firestore {
                       && isValidId(foodId) 
                       && request.auth.uid == userId
                       && isValidFoodItem(incoming()) 
-                      && incoming().keys().hasOnly(['id', 'name', 'calories', 'macros', 'timestamp', 'imageUrl']);
+                      && incoming().keys().size() == ('imageUrl' in incoming() ? 6 : 5);
         
         allow delete: if isSignedIn() && request.auth.uid == userId;
       }

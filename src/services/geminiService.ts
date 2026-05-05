@@ -5,7 +5,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function analyzeFoodImage(base64Data: string, mimeType: string) {
   const response = await ai.models.generateContent({
-    model: 'gemini-3-flash-preview',
+    model: 'gemini-2.5-flash',
     contents: {
        role: 'user', 
        parts: [
@@ -51,7 +51,7 @@ Adapte a dieta incluindo opções saudáveis, mas mantenha a meta calórica e ma
 Forneça sugestões detalhadas. Responda estritamente em JSON usando o schema definido.`;
 
   const response = await ai.models.generateContent({
-     model: 'gemini-3.1-pro-preview',
+     model: 'gemini-2.5-flash',
      contents: prompt,
      config: {
         responseMimeType: "application/json",
@@ -100,15 +100,9 @@ export async function chatWithCoach(
   previousMessages: {role: string, text: string}[],
   onAction?: (action: 'generate_diet' | 'generate_workout') => void
 ) {
-  const contents: any[] = [
-    { 
-      role: 'user', 
-      parts: [{ text: `Instruções do Sistema: Você é a FitVision IA, um coach de fitness e nutricionista amigável. Dê respostas curtas, práticas e motivadoras em português do Brasil. O usuário foca em ${profile.goal}, pesa ${profile.weight}kg, tem ${profile.height}cm e tenta consumir ${Math.round(profile.targetCalories)}kcal/dia.\nNão saia do personagem. Responda às próximas mensagens do usuário com base nisso.` }] 
-    },
-    { role: 'model', parts: [{ text: 'Entendido! Estou pronto para ajudar e motivar.' }]}
-  ];
+  const contents: any[] = [];
 
-  // Adiciona histórico ignorando a primeira resposta mock inicial que o componente pode colocar
+  // Adiciona histórico
   previousMessages.forEach(m => {
     contents.push({
       role: m.role === 'user' ? 'user' : 'model',
@@ -122,19 +116,20 @@ export async function chatWithCoach(
     functionDeclarations: [
       {
         name: 'trigger_diet_generation',
-        description: 'Chame essa função APENAS quando o usuário pedir explicitamente para criar, fazer ou gerar um cardápio ou dieta NOVA para ele.',
+        description: 'Gera um cardápio e salva no perfil do usuário. CHAME esta função sempre que o usuário pedir um cardápio ou dieta.',
       },
       {
         name: 'trigger_workout_generation',
-        description: 'Chame essa função APENAS quando o usuário pedir explicitamente para criar, fazer ou gerar um plano de treino NOVO para ele.',
+        description: 'Gera um treino e salva no perfil do usuário. CHAME esta função sempre que o usuário pedir um treino ou plano de exercícios.',
       }
     ]
   }];
 
   const response = await ai.models.generateContent({
-    model: 'gemini-3.1-pro-preview',
+    model: 'gemini-2.5-flash',
     contents,
     config: {
+      systemInstruction: `Você é a FitVision IA, um coach de fitness e nutricionista amigável. Dê respostas curtas, práticas e motivadoras em português do Brasil. O usuário foca em ${profile.goal}, pesa ${profile.weight}kg, tem ${profile.height}cm e tenta consumir ${Math.round(profile.targetCalories)}kcal/dia. SE O USUÁRIO PEDIR TREINO OU DIETA, USE AS FUNÇÕES (TOOLS) DISPONÍVEIS! NÃO TENTE MONTAR O TREINO OU DIETA EM TEXTO DIRETAMENTE SE AS FUNÇÕES TIVEREM SIDO FORNECIDAS.`,
       tools
     }
   });
@@ -180,7 +175,7 @@ Para dias de descanso, deixe a lista de exercícios com 1 item descrevendo o tip
 Responda estritamente em JSON usando o schema definido.`;
 
   const response = await ai.models.generateContent({
-     model: 'gemini-3.1-pro-preview',
+     model: 'gemini-2.5-flash',
      contents: prompt,
      config: {
         responseMimeType: "application/json",

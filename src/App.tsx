@@ -97,8 +97,9 @@ export default function App() {
       await setDoc(doc(db, 'users', user.uid), newProfile);
       setProfile(newProfile);
       setView('dashboard');
-    } catch (err) {
-      handleFirestoreError(err, OperationType.CREATE, `users/${user.uid}`);
+    } catch (err: any) {
+      console.error(err);
+      alert('Erro ao salvar perfil. Tente novamente: ' + err.message);
     }
   };
 
