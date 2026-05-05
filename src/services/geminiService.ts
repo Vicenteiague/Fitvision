@@ -123,12 +123,10 @@ export async function chatWithCoach(
       {
         name: 'trigger_diet_generation',
         description: 'Chame essa função APENAS quando o usuário pedir explicitamente para criar, fazer ou gerar um cardápio ou dieta NOVA para ele.',
-        parameters: { type: Type.OBJECT, properties: {} }
       },
       {
         name: 'trigger_workout_generation',
         description: 'Chame essa função APENAS quando o usuário pedir explicitamente para criar, fazer ou gerar um plano de treino NOVO para ele.',
-        parameters: { type: Type.OBJECT, properties: {} }
       }
     ]
   }];
@@ -143,13 +141,25 @@ export async function chatWithCoach(
 
   const functionCalls = response.functionCalls;
   if (functionCalls && functionCalls.length > 0) {
-    const call = functionCalls[0];
-    if (call.name === 'trigger_diet_generation' && onAction) {
-      onAction('generate_diet');
-      return "Acabei de colocar a mão na massa! 🥗 O seu cardápio personalizado está sendo gerado e estará disponível na aba **Cardápio IA**.";
+    let triggeredDiet = false;
+    let triggeredWorkout = false;
+    
+    for (const call of functionCalls) {
+      if (call.name === 'trigger_diet_generation' && onAction) {
+        onAction('generate_diet');
+        triggeredDiet = true;
+      }
+      if (call.name === 'trigger_workout_generation' && onAction) {
+        onAction('generate_workout');
+        triggeredWorkout = true;
+      }
     }
-    if (call.name === 'trigger_workout_generation' && onAction) {
-      onAction('generate_workout');
+    
+    if (triggeredDiet && triggeredWorkout) {
+      return "Pode deixar comigo! 💪🥗 Seu treino e seu cardápio personalizados estão sendo gerados. Eles estarão disponíveis nas abas secundárias correspondentes em alguns instantes!";
+    } else if (triggeredDiet) {
+      return "Acabei de colocar a mão na massa! 🥗 O seu cardápio personalizado está sendo gerado e estará disponível na aba **Cardápio IA**.";
+    } else if (triggeredWorkout) {
       return "Pode deixar comigo! 💪 Seu treino personalizado está sendo montado e logo estará na aba **Treino IA**.";
     }
   }
