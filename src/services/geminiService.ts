@@ -1,9 +1,21 @@
 import { GoogleGenAI, Type } from '@google/genai';
 import type { UserProfile, FoodItem, DietPlan } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let _aiInstance: GoogleGenAI | null = null;
+
+function getAi() {
+  if (!_aiInstance) {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) {
+      throw new Error("GEMINI_API_KEY environment variable is not defined.");
+    }
+    _aiInstance = new GoogleGenAI({ apiKey: key });
+  }
+  return _aiInstance;
+}
 
 export async function analyzeFoodImage(base64Data: string, mimeType: string) {
+  const ai = getAi();
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
     contents: {
@@ -50,6 +62,7 @@ ${historyText}
 Adapte a dieta incluindo opções saudáveis, mas mantenha a meta calórica e macros alinhados ao objetivo. 
 Forneça sugestões detalhadas. Responda estritamente em JSON usando o schema definido.`;
 
+  const ai = getAi();
   const response = await ai.models.generateContent({
      model: 'gemini-2.5-flash',
      contents: prompt,
@@ -125,6 +138,7 @@ export async function chatWithCoach(
     ]
   }];
 
+  const ai = getAi();
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
     contents,
@@ -174,6 +188,7 @@ O treino deve ser dividido adequadamente (ex: ABC, Full Body, Upper/Lower, etc).
 Para dias de descanso, deixe a lista de exercícios com 1 item descrevendo o tipo de descanso.
 Responda estritamente em JSON usando o schema definido.`;
 
+  const ai = getAi();
   const response = await ai.models.generateContent({
      model: 'gemini-2.5-flash',
      contents: prompt,
