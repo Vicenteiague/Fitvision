@@ -4,6 +4,7 @@ import { Dashboard } from './components/Dashboard';
 import { VisionTracker } from './components/VisionTracker';
 import { DietPlanner } from './components/DietPlanner';
 import { Login } from './components/Login';
+import { AICoach } from './components/AICoach';
 import type { UserProfile, FoodItem } from './types';
 import { auth, db, handleFirestoreError, OperationType, signOut } from './lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
@@ -126,6 +127,10 @@ export default function App() {
     return <DietPlanner profile={profile} foodHistory={foodHistory} onBack={() => setView('dashboard')} />;
   }
 
+  if (view === 'coach') {
+    return <AICoach profile={profile} onBack={() => setView('dashboard')} />
+  }
+
   return (
     <div className="relative">
       <button 
@@ -139,6 +144,7 @@ export default function App() {
         foodHistory={foodHistory} 
         onOpenTracker={() => setView('vision')}
         onOpenDiet={() => setView('diet')}
+        onOpenCoach={() => setView('coach')}
       />
     </div>
   );

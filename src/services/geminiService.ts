@@ -93,3 +93,30 @@ Forneça sugestões detalhadas. Responda estritamente em JSON usando o schema de
   if (!text) throw new Error("No response from AI");
   return JSON.parse(text) as DietPlan;
 }
+
+export async function chatWithCoach(message: string, profile: UserProfile, previousMessages: {role: string, text: string}[]) {
+  const contents: any[] = [
+    { 
+      role: 'user', 
+      parts: [{ text: `Instruções do Sistema: Você é a FitVision IA, um coach de fitness e nutricionista amigável. Dê respostas curtas, práticas e motivadoras em português do Brasil. O usuário foca em ${profile.goal}, pesa ${profile.weight}kg, tem ${profile.height}cm e tenta consumir ${Math.round(profile.targetCalories)}kcal/dia.\nNão saia do personagem. Responda às próximas mensagens do usuário com base nisso.` }] 
+    },
+    { role: 'model', parts: [{ text: 'Entendido! Estou pronto para ajudar e motivar.' }]}
+  ];
+
+  // Adiciona histórico ignorando a primeira resposta mock inicial que o componente pode colocar
+  previousMessages.forEach(m => {
+    contents.push({
+      role: m.role === 'user' ? 'user' : 'model',
+      parts: [{ text: m.text }]
+    });
+  });
+
+  contents.push({ role: 'user', parts: [{ text: message }] });
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-3.1-pro-preview',
+    contents
+  });
+
+  return response.text;
+}
